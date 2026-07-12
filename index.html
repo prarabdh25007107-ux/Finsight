@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>FinSight.AI | Interactive Personal Finance & Data Analytics Dashboard</title>
+  <meta name="description" content="An interactive AI-driven transaction categorization and finance prediction dashboard built with Chart.js.">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- ChartJS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Local Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="bg-blob-1"></div>
+  <div class="bg-blob-2"></div>
+  <div class="bg-grid"></div>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <i class="fa-solid fa-brain brand-glow"></i> FinSight<span class="brand-glow">.AI</span>
+      </a>
+      <a href="../index.html" class="back-btn"><i class="fa-solid fa-circle-arrow-left"></i> Back to Portfolio</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTAINER -->
+  <main>
+    
+    <div class="header-info">
+      <h1>AI Finance Analytics</h1>
+      <p>Analyze transaction streams, predict category labels via mock LLMs, and track cash-flow metrics in real time.</p>
+    </div>
+
+    <!-- METRICS GRID -->
+    <div class="metric-grid">
+      <!-- Total Spent -->
+      <div class="glass-card" id="card-total-spent">
+        <div class="metric-title">Total Outflow <i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+        <div class="metric-value" id="val-total-spent">₹42,500</div>
+        <div class="metric-change change-down"><i class="fa-solid fa-caret-down"></i> 4.2% less than last month</div>
+      </div>
+
+      <!-- Savings Rate -->
+      <div class="glass-card" id="card-savings">
+        <div class="metric-title">Savings Rate <i class="fa-solid fa-piggy-bank"></i></div>
+        <div class="metric-value" id="val-savings">38.4%</div>
+        <div class="metric-change change-up"><i class="fa-solid fa-caret-up"></i> 1.8% increase this week</div>
+      </div>
+
+      <!-- AI Accuracy -->
+      <div class="glass-card" id="card-ai-accuracy">
+        <div class="metric-title">AI Auto-Classified <i class="fa-solid fa-circle-check"></i></div>
+        <div class="metric-value" id="val-classified-count">100%</div>
+        <div class="metric-change change-up"><i class="fa-solid fa-shield-halved"></i> LLM verified labels</div>
+      </div>
+
+      <!-- Projected Spend -->
+      <div class="glass-card" id="card-projected">
+        <div class="metric-title">Projected Spend <i class="fa-solid fa-chart-line"></i></div>
+        <div class="metric-value" id="val-projected">₹47,200</div>
+        <div class="metric-change change-down"><i class="fa-solid fa-wand-magic-sparkles"></i> 90% confidence index</div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD COLS -->
+    <div class="dashboard-layout">
+      
+      <!-- LEFT COL: CHARTS -->
+      <div class="chart-panel-container">
+        
+        <!-- Doughnut category breakdown -->
+        <div class="glass-card">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-chart-pie"></i> Category Distribution</h3>
+          </div>
+          <div class="chart-box">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Monthly spending flow -->
+        <div class="glass-card">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-chart-area"></i> Spending Trend & Predictions</h3>
+          </div>
+          <div class="chart-box">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COL: INTERACTIVE PANEL -->
+      <div class="interaction-panel">
+        
+        <!-- TRANSACTION AUTO-CATEGORIZER (FORM) -->
+        <div class="glass-card">
+          <div class="chart-header">
+            <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Label Transaction</h3>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Type a transaction log (e.g. "Dinner with family at local diner 1200") to trigger a simulated classification model run.
+          </p>
+
+          <form id="categorize-form">
+            <div class="form-group">
+              <label class="form-label" for="raw-transaction">Transaction Raw String</label>
+              <div class="input-row">
+                <input type="text" id="raw-transaction" class="text-input" placeholder="Spotify Premium Sub 179" required autocomplete="off">
+                <button type="submit" class="btn btn-primary" id="btn-analyze">Analyze</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="ai-feedback-container" id="ai-loading">
+            <div class="ai-spinner"></div>
+            <div id="ai-status-text">LLM tokenizing inputs...</div>
+          </div>
+        </div>
+
+        <!-- DATA VIEWER AND FILTERS -->
+        <div class="glass-card transaction-card">
+          <div class="chart-header" style="margin-bottom: 0.5rem;">
+            <h3><i class="fa-solid fa-list"></i> Transaction History</h3>
+            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" id="btn-export">
+              <i class="fa-solid fa-file-csv"></i> CSV
+            </button>
+          </div>
+
+          <!-- Filters -->
+          <ul class="filter-pills">
+            <li><button class="pill-btn active" data-filter="all" id="pill-all">All</button></li>
+            <li><button class="pill-btn" data-filter="Food" id="pill-food">Food</button></li>
+            <li><button class="pill-btn" data-filter="Travel" id="pill-travel">Travel</button></li>
+            <li><button class="pill-btn" data-filter="Utilities" id="pill-utilities">Utilities</button></li>
+            <li><button class="pill-btn" data-filter="Shopping" id="pill-shopping">Shopping</button></li>
+            <li><button class="pill-btn" data-filter="Subscriptions" id="pill-subscriptions">Subs</button></li>
+          </ul>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Log description</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="transaction-rows">
+                <!-- Prepopulated Rows -->
+                <tr data-cat="Subscriptions">
+                  <td>Netflix Monthly Premium Plan</td>
+                  <td><span class="badge badge-sub">Subscriptions</span></td>
+                  <td>₹649</td>
+                </tr>
+                <tr data-cat="Food">
+                  <td>Starbucks Coffee House</td>
+                  <td><span class="badge badge-food">Food</span></td>
+                  <td>₹280</td>
+                </tr>
+                <tr data-cat="Travel">
+                  <td>Uber Cab Ride to Station</td>
+                  <td><span class="badge badge-travel">Travel</span></td>
+                  <td>₹450</td>
+                </tr>
+                <tr data-cat="Utilities">
+                  <td>BSNL Broadband Internet</td>
+                  <td><span class="badge badge-util">Utilities</span></td>
+                  <td>₹999</td>
+                </tr>
+                <tr data-cat="Shopping">
+                  <td>Zara Denim Jackets bought online</td>
+                  <td><span class="badge badge-shop">Shopping</span></td>
+                  <td>₹3,499</td>
+                </tr>
+                <tr data-cat="Food">
+                  <td>Swiggy Delivery (Biryani feast)</td>
+                  <td><span class="badge badge-food">Food</span></td>
+                  <td>₹720</td>
+                </tr>
+                <tr data-cat="Utilities">
+                  <td>Electricity Bill payment Online</td>
+                  <td><span class="badge badge-util">Utilities</span></td>
+                  <td>₹1,850</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Local Script -->
+  <script src="script.js"></script>
+</body>
+</html>
